@@ -101,7 +101,6 @@ function mark(frontier, maze, frontierNdx) {
 }
 
 function printMaze(maze) {
-    console.log("New Maze print YAY:");
     var currLine = "";
     for (var i = 0; i < maze.length; i++) {
         currLine = "";
@@ -188,12 +187,90 @@ function buildMaze(maze) {
 
 }
 
+function mazeCopy(maze) {
+    var newMaze = [];
+    for (var r = 0; r < maze.length; r++) {
+        newMaze.push([]);
+        for (var c = 0; c < maze[r].length; c++) {
+            newMaze[r][c] = maze[r][c];
+        }
+    }
+    return newMaze;
+}
+
 function solveMaze(maze, start) {
     // Solve and show solution (in browser)
     // TODO solve
+    var done = false;
+    var queue = [];
+    var currCell;
+    var infinity = 5000;
+    var row;
+    var col;
 
+    var newMaze = mazeCopy(maze);
 
-    console.log("Solved");
+    for (var r = 0; r < newMaze.length; r++) {
+        for (var c = 0; c < newMaze[r].length; c++) {
+            if (newMaze[r][c] === "IN" || newMaze[r][c] === "end") {
+                newMaze[r][c] = infinity;
+            }
+            else { // WALL or NOT IN
+                newMaze[r][c] = -1;
+            }
+        }
+    }
+
+    newMaze[start[0]][start[1]] = 0;
+    // push the starting position
+    queue.push( [start[0], start[1]] );
+    var currDistance;
+
+    while (queue.length > 0 && done === false) {
+        currCell = queue.shift();
+        row = currCell[0];
+        col = currCell[1];
+        currDistance = newMaze[row][col];
+
+        if (maze[row][col] === "end") {
+            done = true;
+        }
+        else {
+            // Add the neighbors
+            // Check tentative distances, if tentative distance < current distance
+            // add to queue and update the distance
+            currDistance = newMaze[row][col];
+
+            if (row + 1 >= 0 && row + 1 < newMaze.length && col >= 0 && col < newMaze[0].length && currDistance + 1 < newMaze[row + 1][col]) {
+                if (newMaze[row + 1][col] !== -1) { // Not a wall
+                    newMaze[row + 1][col] = currDistance + 1;
+                    queue.push([row + 1, col]);
+                }
+            }
+            if (row - 1 >= 0 && row - 1 < newMaze.length && col >= 0 && col < newMaze[0].length && currDistance + 1 < newMaze[row - 1][col]) {
+                if (newMaze[row - 1][col] !== -1) { // Not a wall
+                    newMaze[row - 1][col] = currDistance + 1;
+                    queue.push([row - 1, col]);
+                }
+            }
+            if (row >= 0 && row < newMaze.length && col + 1 >= 0 && col + 1 < newMaze[0].length && currDistance + 1 < newMaze[row][col + 1]) {
+                if (newMaze[row][col + 1] !== -1) { // Not a wall
+                    newMaze[row][col + 1] = currDistance + 1;
+                    queue.push([row, col + 1]);
+                }
+            }
+            if (row >= 0 && row < newMaze.length && col - 1 >= 0 && col - 1 >= 0 && col - 1 < newMaze[0].length && currDistance + 1 < newMaze[row][col - 1]) {
+                if (newMaze[row][col - 1] !== -1) { // Not a wall
+                    newMaze[row][col - 1] = currDistance + 1;
+                    queue.push([row, col - 1]);
+                }
+            }
+        }
+    }
+
+    // Backtrack to find shortestpath
+
+    printMaze(newMaze);
 }
 
 // Create HTML elements and add them to Maze.html
@@ -212,13 +289,13 @@ function drawMaze(maze) {
             else if (maze[r][c] === "start") {
                 type = "start";
                 HTML += "<div class=\"" + type + "\">";
-                HTML += "<img src=\"StickMan.png\" alt=\"Smiley face\" height=\"30\" width=\"30\">";
+                HTML += "<img src=\"StickMan.png\" height=\"30\" width=\"30\">";
                 HTML += "</div>";
             }
             else if (maze[r][c] === "end") {
                 type = "end";
                 HTML += "<div class=\"" + type + "\">";
-                HTML += "<img src=\"CoffeeMug.jpg\" alt=\"Smiley face\" height=\"30\" width=\"30\">";
+                HTML += "<img src=\"CoffeeMug.jpg\" height=\"30\" width=\"30\">";
                 HTML += "</div>";
             }
             else {
@@ -235,14 +312,13 @@ function drawMaze(maze) {
 }
 
 function start() {
-    console.log("Starting");
     // Keeps track of where walls and non-walls are
     // 0: a wall
     // 1: a valid walk place... carpet?
     // Could prompt user for size of map
     var maze = [];
-    var rows = 20;
-    var cols = 40;
+    var rows = 6;
+    var cols = 6;
     var startEnd;
 
     for (var i = 0; i < rows; i++) {
