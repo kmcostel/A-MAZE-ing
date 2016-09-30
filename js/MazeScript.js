@@ -88,11 +88,11 @@ function mark(frontier, maze, frontierNdx) {
     // Get the row and col of the frontier cell
     var r = frontier[frontierNdx][0];
     var c = frontier[frontierNdx][1];
-
+    maze[r][c] = "IN";
     // Remove the given cell from the frontier and
     // mark it as in the maze
     frontier.splice(frontierNdx, 1);
-    maze[r][c] = "IN";
+
 
     // Add the neighbors of the given cell to the frontier
     // If not already in the map
@@ -116,8 +116,8 @@ function buildMaze(maze) {
     var neighbors;
     var randNdx;
     var nextFrontier;
-    var startRow = 0; //Math.floor(Math.random() * maze.length);
-    var startCol = 1; //Math.floor(Math.random() * maze[0].length);
+    var startRow = Math.floor(Math.random() * maze.length);
+    var startCol = Math.floor(Math.random() * maze[0].length);
 
     //Cells to consider making part of the maze's path?
     var frontier = [];
@@ -136,42 +136,44 @@ function buildMaze(maze) {
     var frontierCol;
     var inNeighRow; // all frontier cells must have a neighbor in the maze
     var inNeighCol;
+
     while (frontier.length > 0) {
         // Presumably random index into the frontier
-        console.log("Frontier length = " + frontier.length);
+        // console.log("Frontier length = " + frontier.length);
         nextFrontier = Math.floor(Math.random() * frontier.length);
 
         frontierRow = frontier[nextFrontier][0];
         frontierCol = frontier[nextFrontier][1];
 
-        // Returns neighbors "IN" the maze of the marked cell, need to connect the marked cell
-        // to one of these neighbors
+        // Returns neighbors "IN" the maze of this frontier cell
         neighbors = getNeighbors(maze, frontierRow, frontierCol);
 
+        // Include this cell from the frontier as "IN" the maze
+        mark(frontier, maze, nextFrontier);
+
         // Pick a random neighbor of the frontier cell
-        // >= 1 neighbor
+        // At least 1 neighbor "IN" the maze by definition
         randNdx = Math.floor(Math.random() * neighbors.length);
         inNeighRow = neighbors[randNdx][0];
         inNeighCol = neighbors[randNdx][1];
+        // Mark the connecting cell between this neighbor and the frontier cell
+        // also as "IN" (part of the maze)
+        maze[frontierRow - (frontierRow - inNeighRow) / 2][frontierCol - (frontierCol - inNeighCol) / 2] = "IN";
 
+        // Go through the neighbors and either add a path or a wall between them
         for (var i = 0; i < neighbors.length; i++) {
-            oRow = neighbors[i][0];
-            oCol = neighbors[i][1];
-            var rDiff = (oRow - frontierRow) / 2;
-            var cDiff = (oCol - frontierCol) / 2;
-            if (i === randNdx) {
-                // Connect this cell and the nextCell together in the graph
-                // Say the frontier cell is "IN"
-                maze[frontierRow][frontierCol] = "IN";
-                // Say the cell connecting the IN neighbor and the frontier is also "IN"
-                maze[inNeighRow - rDiff][inNeighCol - cDiff] = "IN";
-            }
-            else {
-                // Put a wall between nextCell and this cell
-                maze[inNeighRow - rDiff][inNeighCol - cDiff] = "WALL";
+            // This is so ugly fix this up
+            var nRow = neighbors[i][0];
+            var nCol = neighbors[i][1];
+            var rDiff = (frontierRow - nRow) / 2;
+            var cDiff = (frontierCol - nCol) / 2;
+            if (i !== randNdx) {
+                // Place a "WALL" between the frontier cell and this neighbor
+                // Probably doesn't work
+                maze[nRow + rDiff][nCol + cDiff] = "WALL";
             }
         }
-        printMaze();
+        //printMaze(maze);
 
     }
 
@@ -179,11 +181,17 @@ function buildMaze(maze) {
 
 function solveMaze(maze) {
     // Solve and show solution (in browser)
-    console.log("Solving");
     // TODO solve
 
 
     console.log("Solved");
+}
+
+// Create HTML elements and add them to Maze.html
+function drawMaze(maze) {
+    console.log("Drawing maze");
+    //TODO Draw maze with jQuery
+
 }
 
 function start() {
@@ -193,8 +201,8 @@ function start() {
     // 1: a valid walk place... carpet?
     // Could prompt user for size of map
     var maze = [];
-    var rows = 4;
-    var cols = 4;
+    var rows = 8;
+    var cols = 8;
 
     for (var i = 0; i < rows; i++) {
         // Create arrays for each row/col
@@ -213,12 +221,14 @@ function start() {
     // Fill in the maze object with walls and what not
     buildMaze(maze);
 
+    drawMaze(maze);
+
     // Djikstra?
     solveMaze(maze);
 
     // Remove this when implemented
     console.log("Done!");
-    console.log(maze);
+    printMaze(maze);
 }
 
 start();
