@@ -7,7 +7,6 @@
  * on a web page; like are the rows really the rows?
  */
 
-// arr is [r,c]
 function getNeighbors(maze, r, c) {
     var row = r;
     var col = c;
@@ -101,13 +100,14 @@ function mark(frontier, maze, frontierNdx) {
 }
 
 function printMaze(maze) {
-    var currLine = "";
+    var currLine;
+
     for (var i = 0; i < maze.length; i++) {
         currLine = "";
         for (var j = 0; j < maze[i].length; j++) {
             currLine += maze[i][j] + " | ";
         }
-        console.log(currLine);
+        //console.log(currLine);
     }
 }
 
@@ -198,6 +198,55 @@ function mazeCopy(maze) {
     return newMaze;
 }
 
+function backTrack(maze, endRow, endCol) {
+
+    // Similiar in structure to maze
+    // 2D array of divs
+    var MazeDivs = $("#MazeDiv")[0].children;
+    var currDiv;
+    console.log(MazeDivs);
+
+    var curRow = endRow;
+    var curCol = endCol;
+    // Start with the total path length from start to end
+    var distance = maze[curRow][curCol];
+    var id; //id of a specific html div in the solution path
+
+    while (distance > 0) {
+        distance = maze[curRow][curCol];
+        if (curRow + 1 >= 0 && curRow + 1 < maze.length && curCol >= 0 && curCol < maze[0].length && maze[curRow + 1][curCol] === distance - 1) {
+            maze[curRow][curCol] = 0;
+            id = "r" + curRow + "c" + curCol;
+            $("#" + id).css("background-color", "white");
+            curRow += 1;
+            //curCol = curCol;
+        }
+        else if (curRow - 1 >= 0 && curRow - 1 < maze.length && curCol >= 0 && curCol < maze[0].length && maze[curRow - 1][curCol] === distance - 1) {
+            maze[curRow][curCol] = 0;
+            id = "r" + curRow + "c" + curCol;
+            $("#" + id).css("background-color", "white");
+            curRow -= 1;
+            //curCol = curCol;
+        }
+        else if (curRow >= 0 && curRow < maze.length && curCol + 1 >= 0 && curCol + 1 < maze[0].length && maze[curRow][curCol + 1] === distance - 1) {
+            //curRow = curRow;
+            maze[curRow][curCol] = 0;
+            id = "r" + curRow + "c" + curCol;
+            $("#" + id).css("background-color", "white");
+            curCol += 1;
+        }
+        else if (curRow >= 0 && curRow < maze.length && curCol - 1 >= 0 && curCol - 1 < maze[0].length && maze[curRow][curCol - 1] === distance - 1) {
+            //curRow = curRow;
+            maze[curRow][curCol] = 0;
+            id = "r" + curRow + "c" + curCol;
+            $("#" + id).css("background-color", "white");
+            curCol -= 1;
+        }
+
+    }
+    printMaze(maze);
+}
+
 function solveMaze(maze, start) {
     // Solve and show solution (in browser)
     // TODO solve
@@ -207,6 +256,8 @@ function solveMaze(maze, start) {
     var infinity = 5000;
     var row;
     var col;
+
+
 
     var newMaze = mazeCopy(maze);
 
@@ -225,6 +276,8 @@ function solveMaze(maze, start) {
     // push the starting position
     queue.push( [start[0], start[1]] );
     var currDistance;
+    var endCol;
+    var endRow;
 
     while (queue.length > 0 && done === false) {
         currCell = queue.shift();
@@ -233,6 +286,8 @@ function solveMaze(maze, start) {
         currDistance = newMaze[row][col];
 
         if (maze[row][col] === "end") {
+            endRow = row;
+            endCol = col;
             done = true;
         }
         else {
@@ -269,8 +324,8 @@ function solveMaze(maze, start) {
     }
 
     // Backtrack to find shortestpath
+    backTrack(newMaze, endRow, endCol);
 
-    printMaze(newMaze);
 }
 
 // Create HTML elements and add them to Maze.html
@@ -278,13 +333,15 @@ function drawMaze(maze) {
 
     var type;
     var HTML;
+    var id;
 
     for (var r = 0; r < maze.length; r++) {
         HTML = "<div class=\"container\">";
         for (var c = 0; c < maze[r].length; c++) {
             if (maze[r][c] === "NOT IN" || maze[r][c] === "WALL") {
                 type = "wall";
-                HTML += "<div class=\"" + type + "\"></div>";
+                id = "r" + r + "c" + c;
+                HTML += "<div id=\""+id+ "\" class=\"" + type + "\"></div>";
             }
             else if (maze[r][c] === "start") {
                 type = "start";
@@ -300,7 +357,8 @@ function drawMaze(maze) {
             }
             else {
                 type = "path";
-                HTML += "<div class=\"" + type + "\"></div>";
+                id = "r" + r + "c" + c;
+                HTML += "<div id=\""+id+ "\" class=\"" + type + "\"></div>";
             }
         }
         HTML += "</div>";
@@ -317,8 +375,8 @@ function start() {
     // 1: a valid walk place... carpet?
     // Could prompt user for size of map
     var maze = [];
-    var rows = 6;
-    var cols = 6;
+    var rows = 16;
+    var cols = 16;
     var startEnd;
 
     for (var i = 0; i < rows; i++) {
