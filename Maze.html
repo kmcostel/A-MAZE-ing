@@ -1,28 +1,66 @@
+<!--
+    Author: Kevin Costello
+    Date: 9/29/2016
+    Program: Maze Maker
+-->
+
 <!doctype html>
 
 <html lang="en">
 <head>
   <meta charset="utf-8">
   <title>My Maze Solver</title>
+
+  <!--Javascript -->
+  <!--<script src="js/d3.min.js"></script> -->
   <script src="js/jquery-3.1.1.min.js"></script>
-  <script src=js/MazeScript.js></script>
+
+
 
   <style>
     .wall {
     /* Black */
-      color: black;
+        background-color: black;
+        float: left;
+
     }
-    .noWall {
-      /* light grey? */
-      color: light-grey;
+    .start {
+        background-color: white;
+        float: left;
     }
+    .end {
+        background-color: purple;
+        float: left;
+    }
+    .path {
+        /* light grey? */
+        background-color: gray;
+        float: left;
+    }
+    .wall, .path, .start, .end {
+        width: 25px;
+    }
+    .container {
+        width: 100%;
+    }
+    .container, .path, .wall, .start, .end {
+        height: 25px;
+    }
+    #MazeDiv {
+        width: 100%;
+        height: 70%;
+    }
+
   </style>
 </head>
 
 <body>
-  <h1> My Maze </h1>
-  <div id = MazeSpace>
+  <h1> Where's the coffee?</h1>
+  <button id="solve">Find the coffee! </button>
+  <div id="MazeDiv">
 
 
+  </div>
 </body>
+<script src=js/MazeScript.js></script>
 </html>

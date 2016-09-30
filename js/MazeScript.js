@@ -1,5 +1,6 @@
 /* Author: Kevin Costello
- * Date: 9/27/2016
+ * Date: 9/29/2016
+ * Program: Maze Maker
  */
 
 /* Need to confirm relation with structure of maze[][] to actual representation
@@ -35,9 +36,9 @@ function getNeighbors(maze, r, c) {
 
 // Checks if a row, col pair is already contained in the frontier
 // Don't want duplicates in the frontier
-function frontierContains(frontier, r, c) {
+function frontierContains(frontier, row, col) {
     for (var i = 0; i < frontier.length; i++) {
-        if (r === frontier[i][0] && c === frontier[i][1]) {
+        if (row === frontier[i][0] && col === frontier[i][1]) {
             return true;
         }
     }
@@ -116,8 +117,13 @@ function buildMaze(maze) {
     var neighbors;
     var randNdx;
     var nextFrontier;
+    var endSpot;
+    var startEnd = [];
+
+    //Pick starting position to build maze from ie begin algorithm here this cell
     var startRow = Math.floor(Math.random() * maze.length);
     var startCol = Math.floor(Math.random() * maze[0].length);
+    startEnd.push([startRow, startCol]);
 
     //Cells to consider making part of the maze's path?
     var frontier = [];
@@ -125,7 +131,7 @@ function buildMaze(maze) {
     // since only thing in the frontier
     frontier.push([startRow, startCol]);
 
-    // Mark marks the first cell as being in the maze
+    // mark() marks this first cell as being in the maze
     // and adds all its neighbors to the frontier
     mark(frontier, maze, 0);
 
@@ -138,8 +144,7 @@ function buildMaze(maze) {
     var inNeighCol;
 
     while (frontier.length > 0) {
-        // Presumably random index into the frontier
-        // console.log("Frontier length = " + frontier.length);
+        // Random index into the frontier
         nextFrontier = Math.floor(Math.random() * frontier.length);
 
         frontierRow = frontier[nextFrontier][0];
@@ -158,8 +163,10 @@ function buildMaze(maze) {
         inNeighCol = neighbors[randNdx][1];
         // Mark the connecting cell between this neighbor and the frontier cell
         // also as "IN" (part of the maze)
-        maze[frontierRow - (frontierRow - inNeighRow) / 2][frontierCol - (frontierCol - inNeighCol) / 2] = "IN";
-
+        var frontRowNeigh = frontierRow - (frontierRow - inNeighRow) / 2;
+        var frontColNeigh = frontierCol - (frontierCol - inNeighCol) / 2;
+        maze[frontRowNeigh][frontColNeigh] = "IN";
+        end = [frontRowNeigh, frontColNeigh];
         // Go through the neighbors and either add a path or a wall between them
         for (var i = 0; i < neighbors.length; i++) {
             // This is so ugly fix this up
@@ -173,13 +180,15 @@ function buildMaze(maze) {
                 maze[nRow + rDiff][nCol + cDiff] = "WALL";
             }
         }
-        //printMaze(maze);
+
 
     }
+    startEnd.push(end);
+    return startEnd;
 
 }
 
-function solveMaze(maze) {
+function solveMaze(maze, start) {
     // Solve and show solution (in browser)
     // TODO solve
 
@@ -189,8 +198,39 @@ function solveMaze(maze) {
 
 // Create HTML elements and add them to Maze.html
 function drawMaze(maze) {
-    console.log("Drawing maze");
-    //TODO Draw maze with jQuery
+
+    var type;
+    var HTML;
+
+    for (var r = 0; r < maze.length; r++) {
+        HTML = "<div class=\"container\">";
+        for (var c = 0; c < maze[r].length; c++) {
+            if (maze[r][c] === "NOT IN" || maze[r][c] === "WALL") {
+                type = "wall";
+                HTML += "<div class=\"" + type + "\"></div>";
+            }
+            else if (maze[r][c] === "start") {
+                type = "start";
+                HTML += "<div class=\"" + type + "\">";
+                HTML += "<img src=\"StickMan.png\" alt=\"Smiley face\" height=\"30\" width=\"30\">";
+                HTML += "</div>";
+            }
+            else if (maze[r][c] === "end") {
+                type = "end";
+                HTML += "<div class=\"" + type + "\">";
+                HTML += "<img src=\"CoffeeMug.jpg\" alt=\"Smiley face\" height=\"30\" width=\"30\">";
+                HTML += "</div>";
+            }
+            else {
+                type = "path";
+                HTML += "<div class=\"" + type + "\"></div>";
+            }
+        }
+        HTML += "</div>";
+        $("#MazeDiv").append(HTML);
+    }
+
+
 
 }
 
@@ -201,15 +241,16 @@ function start() {
     // 1: a valid walk place... carpet?
     // Could prompt user for size of map
     var maze = [];
-    var rows = 8;
-    var cols = 8;
+    var rows = 20;
+    var cols = 40;
+    var startEnd;
 
     for (var i = 0; i < rows; i++) {
         // Create arrays for each row/col
         maze.push([]);
     }
 
-    for (var i = 0; i < maze.length; i++) {
+    for (var i = 0; i < rows; i++) {
         for (var j = 0; j < cols; j++) {
             // Init every cell to have value 0
             // ie. be a wall
@@ -219,15 +260,24 @@ function start() {
     }
 
     // Fill in the maze object with walls and what not
-    buildMaze(maze);
+    startEnd = buildMaze(maze);
+    var startRow = startEnd[0][0];
+    var startCol = startEnd[0][1];
+    maze[startRow][startCol] = "start";
+
+    var endRow = startEnd[1][0];
+    var endCol = startEnd[1][1];
+    maze[endRow][endCol] = "end";
 
     drawMaze(maze);
 
     // Djikstra?
-    solveMaze(maze);
+    //solveMaze(maze);
+    $("#solve").on("click", function() {
+        // Pass the maze and the start position
+        solveMaze(maze, startEnd[0]);
+    });
 
-    // Remove this when implemented
-    console.log("Done!");
     printMaze(maze);
 }
 
