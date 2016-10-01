@@ -1,7 +1,7 @@
 <!--
     Author: Kevin Costello
-    Date: 9/30/2016
-    Program: Maze Maker
+    Date: 10/01/2016
+    Program: Maze Maker & Solver
 -->
 
 <!doctype html>
@@ -15,37 +15,41 @@
   <script src="js/jquery-3.1.1.min.js"></script>
 
   <style>
+
     .wall {
       background-color: black;
     }
-
     .start, .end, .path, .wall{
       float: left;
     }
-
     .path {
       background-color: gray;
       animation-name: pathFade;
       animation-duration: 0.3s;
     }
-
+    .final {
+      background-color: yellow;
+      animation-name: showSolution;
+      animation-duration: 0.4s;
+    }
     #MazeDiv {
       width: 1200px;
       height: 500px;
     }
-
     button {
       cursor: pointer;
     }
-
     textarea {
-      /*Don't allow resizing of the text areas*/
+      /* Don't allow resizing of the text areas */
       resize: none;
     }
-
     @keyframes pathFade {
       from { background-color: black; }
       to { background-color: gray; }
+    }
+    @keyframes showSolution {
+      from { background-color: gray; }
+      to { background-color: yellow; }
     }
   </style>
 </head>
@@ -60,7 +64,7 @@
 
   <script>
     function customMazeSize() {
-      // Pass the entered row and col size (handle bad input in start())
+      // Pass the entered row and col size (handle bad input in start ()
       start($('#numRows').val(), $('#numCols').val());
     }
   </script>

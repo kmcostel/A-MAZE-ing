@@ -1,6 +1,6 @@
 /* Author: Kevin Costello
- * Date: 9/30/2016
- * Program: Maze Maker
+ * Date: 10/01/2016
+ * Program: Maze Maker & Solver
  * Description: Program creates a maze by using Primm's modified algorithm
  * by largely referencing this blog:
  http://weblog.jamisbuck.org/2011/1/10/maze-generation-prim-s-algorithm
@@ -22,7 +22,7 @@
  *
 
 /* Images:
- * Stickman: https://www.google.com/url?sa=i&rct=j&q=&esrc=s&source=images&cd=&cad=rja&uact=8&ved=0ahUKEwjg4e3ij7rPAhUJ1oMKHX83BiQQjRwIBw&url=https%3A%2F%2Fen.wikipedia.org%2Fwiki%2FStick_figure&bvm=bv.134495766,d.amc&psig=AFQjCNHmxCqtUJyPG4W4w9Ch_2p-5Rdhvg&ust=1475429074891656
+ * Stickman: https://en.wikipedia.org/wiki/Stick_figure#/media/File:Stick_Figure.svg
  * Coffee: http://patrickdobson.com/wp-content/uploads/2015/12/coffee-beans.jpg
  */
 
@@ -244,35 +244,30 @@ function backTrack(maze, endRow, endCol) {
     // when moving from one cell to the next in the path
     while (distance > 0) {
         distance = maze[curRow][curCol];
+        id = "#r" + curRow + "c" + curCol;
         if (curRow + 1 >= 0 && curRow + 1 < maze.length && curCol >= 0 &&
             curCol < maze[0].length && maze[curRow + 1][curCol] === distance - 1) {
 
-            maze[curRow][curCol] = 0;
-            id = "r" + curRow + "c" + curCol;
-            $("#" + id).css("background-color", "yellow");
-            curRow += 1;
-            //curCol = curCol;
+                    $(id).addClass("final");
+                    curRow += 1;
         }
-        else if (curRow - 1 >= 0 && curRow - 1 < maze.length && curCol >= 0 && curCol < maze[0].length && maze[curRow - 1][curCol] === distance - 1) {
-            maze[curRow][curCol] = 0;
-            id = "r" + curRow + "c" + curCol;
-            $("#" + id).css("background-color", "yellow");
-            curRow -= 1;
-            //curCol = curCol;
+        else if (curRow - 1 >= 0 && curRow - 1 < maze.length && curCol >= 0 &&
+                 curCol < maze[0].length && maze[curRow - 1][curCol] === distance - 1) {
+
+                    $(id).addClass("final");
+                    curRow -= 1;
         }
-        else if (curRow >= 0 && curRow < maze.length && curCol + 1 >= 0 && curCol + 1 < maze[0].length && maze[curRow][curCol + 1] === distance - 1) {
-            //curRow = curRow;
-            maze[curRow][curCol] = 0;
-            id = "r" + curRow + "c" + curCol;
-            $("#" + id).css("background-color", "yellow");
-            curCol += 1;
+        else if (curRow >= 0 && curRow < maze.length && curCol + 1 >= 0 &&
+                 curCol + 1 < maze[0].length && maze[curRow][curCol + 1] === distance - 1) {
+
+                    $(id).addClass("final");
+                    curCol += 1;
         }
-        else if (curRow >= 0 && curRow < maze.length && curCol - 1 >= 0 && curCol - 1 < maze[0].length && maze[curRow][curCol - 1] === distance - 1) {
-            //curRow = curRow;
-            maze[curRow][curCol] = 0;
-            id = "r" + curRow + "c" + curCol;
-            $("#" + id).css("background-color", "yellow");
-            curCol -= 1;
+        else if (curRow >= 0 && curRow < maze.length && curCol - 1 >= 0 &&
+                 curCol - 1 < maze[0].length && maze[curRow][curCol - 1] === distance - 1) {
+
+                    $(id).addClass("final");
+                    curCol -= 1;
         }
 
     }
