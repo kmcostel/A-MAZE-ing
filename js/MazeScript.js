@@ -443,24 +443,31 @@ function refreshPage() {
   $("#solve").unbind("click");
 
   // Clear the text areas
+  // Remove these lines if you want to keep the entered size in the text area
+  // Decided to clear because I want to reduce the possibility
+  // of entering a value and then not clearing it from the area before entering
+  // another value. Easy to enter a value then press enter and have the value move
+  // out of view in the textarea but still present
   $('#numRows').val("");
   $('#numCols').val("");
 
+  $("#sizeErrorDiv").text("");
+
 }
 
-function start(rows, cols) {
-    // Keeps track of where walls and non-walls are
-    // 0: a wall
-    // 1: a valid walk place... carpet?
-    // Could prompt user for size of map
-
-    //Refresh the web page
+// r and c for number of rows and columns respectively
+// r and c taken from the textareas; may or may not be passed in
+function start(r, c) {
+    // Clear event listeners, and clear out the maze's div
     refreshPage();
 
     var maze = [];
 
-    var rows = (rows !== undefined && rows !== "" && rows < 20 && rows > 5 ? rows : 20);
-    var cols = (cols !== undefined && cols !== "" && cols < 40 && cols > 3 ? cols : 40);
+    // Rows limited to size of 5 - 20
+    // Columns limited to a size of 3 - 40
+    // Should tell user that their sized map is not fitting their specs
+    var rows = (r !== undefined && r !== "" && r <= 30 && r >= 10 ? r : 20);
+    var cols = (c !== undefined && c !== "" && c <= 60 && c >= 5  ? c : 50);
 
     // Array to record the position of the maze's start and end
     // startEnd[0] = [startRow, startCo]

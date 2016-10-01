@@ -11,46 +11,31 @@
   <meta charset="utf-8">
   <title>My Maze Solver</title>
 
-  <!--Javascript -->
-  <!--<script src="js/d3.min.js"></script> -->
+  <!-- jQuery and all of its glory -->
   <script src="js/jquery-3.1.1.min.js"></script>
 
-
-
   <style>
-    .final {
-        background-color: green;
-        float: left;
-    }
     .wall {
-        background-color: black;
-        float: left;
+      background-color: black;
+    }
 
+    .start, .end, .path, .wall{
+      float: left;
     }
-    .start {
-        float: left;
-    }
-    .end {
-        float: left;
-    }
+
     .path {
-        /* light grey? */
-        background-color: gray;
-        float: left;
-    }
-    .wall, .path, .start, .end {
-        /*width: 25px;*/
-    }
-    .container {
-        /*width: 100%;*/
-    }
-    .container, .path, .wall, .start, .end {
-       /* height: 25px;*/
+      background-color: gray;
+      animation-name: pathFade;
+      animation-duration: 0.3s;
     }
 
     #MazeDiv {
-        width: 1000px;
-        height: 400px;
+      width: 1200px;
+      height: 500px;
+    }
+
+    button {
+      cursor: pointer;
     }
 
     textarea {
@@ -58,6 +43,10 @@
       resize: none;
     }
 
+    @keyframes pathFade {
+      from { background-color: black; }
+      to { background-color: gray; }
+    }
   </style>
 </head>
 
@@ -65,21 +54,25 @@
   <script src=js/MazeScript.js></script>
   <h1> Where's my coffee...</h1> <!-- Seriously! -->
 
-  # of rows =      <textarea id="numRows" rows="1" cols="3"></textarea>
-  # of columns =   <textarea id="numCols" rows="1" cols="3"></textarea>
+  <button id="customSizeMazeBtn" onclick="customMazeSize()"> Generate custom sized maze! </button>
+  # of rows ( >= 10 & <= 30 ) =      <textarea id="numRows" rows="1" cols="3"></textarea>
+  , # of columns ( >= 5 & <= 60 ) =   <textarea id="numCols" rows="1" cols="3"></textarea>
+
   <script>
-    function customMazeClick() {
+    function customMazeSize() {
+      // Pass the entered row and col size (handle bad input in start())
       start($('#numRows').val(), $('#numCols').val());
     }
   </script>
-  <button id="customSizeMazeBtn" onclick="customMazeClick()"> Generate custom sized maze! </button>
+
   <br>
+
   <button id="solve">Find the coffee! </button>
   <button id="restart"> New floor plan? </button>
 
-  <div id="MazeDiv"></div> <!-- The maze gets created inside this -->
+  <div id="MazeDiv"></div> <!-- The maze gets placed inside this by drawMaze()-->
 
 </body>
-
+<!-- Start it up! -->
 <script> $("document").ready(start); </script>
 </html>
