@@ -1,10 +1,6 @@
 /* Author: Kevin Costello
- * Date: 9/29/2016
+ * Date: 9/30/2016
  * Program: Maze Maker
- */
-
-/* Need to confirm relation with structure of maze[][] to actual representation
- * on a web page; like are the rows really the rows?
  */
 
 function getNeighbors(maze, r, c) {
@@ -35,6 +31,12 @@ function getNeighbors(maze, r, c) {
 
 // Checks if a row, col pair is already contained in the frontier
 // Don't want duplicates in the frontier
+// Could get duplicates when 2 cells are included in the maze
+// that have the same frontier cell such as the middle cell of 2 cells
+// in the same row and 4 columns apart, don't want the middle cell included
+// twice, because it could be taken from the frontier and included in the maze,
+// and then it would still have another representation in the frontier
+// which doesn't make sense... This function prevents that scenario
 function frontierContains(frontier, row, col) {
     for (var i = 0; i < frontier.length; i++) {
         if (row === frontier[i][0] && col === frontier[i][1]) {
@@ -44,8 +46,8 @@ function frontierContains(frontier, row, col) {
     return false;
 }
 
-// Add cells to the frontier that are neighbors to the given cell
-// but are not already "IN" the maze
+// Add cells to the frontier that are neighbors of the given cell
+// AND are not already "IN" the maze AND not already in the frontier
 function addFrontier(r, c, maze, frontier) {
     var row = r;
     var col = c;
@@ -81,34 +83,17 @@ function addFrontier(r, c, maze, frontier) {
 }
 
 function mark(frontier, maze, frontierNdx) {
-    if (frontierNdx < 0) {
-        alert("Yo negative index in frontier what's up?");
-    }
-
     // Get the row and col of the frontier cell
     var r = frontier[frontierNdx][0];
     var c = frontier[frontierNdx][1];
+
+    // Mark it as in the maze
     maze[r][c] = "IN";
-    // Remove the given cell from the frontier and
-    // mark it as in the maze
+    // Remove the given cell from the frontier
     frontier.splice(frontierNdx, 1);
 
-
     // Add the neighbors of the given cell to the frontier
-    // If not already in the map
     addFrontier(r, c, maze, frontier);
-}
-
-function printMaze(maze) {
-    var currLine;
-
-    for (var i = 0; i < maze.length; i++) {
-        currLine = "";
-        for (var j = 0; j < maze[i].length; j++) {
-            currLine += maze[i][j] + " | ";
-        }
-        //console.log(currLine);
-    }
 }
 
 function buildMaze(maze) {
@@ -122,12 +107,13 @@ function buildMaze(maze) {
     //Pick starting position to build maze from ie begin algorithm here this cell
     var startRow = Math.floor(Math.random() * maze.length);
     var startCol = Math.floor(Math.random() * maze[0].length);
+
     startEnd.push([startRow, startCol]);
 
     //Cells to consider making part of the maze's path?
     var frontier = [];
     // Put the start cell in the frontier, guaranteed to be added as "IN" the maze
-    // since only thing in the frontier
+    // since only thing in the frontier; needed to begin the 'while' loop below
     frontier.push([startRow, startCol]);
 
     // mark() marks this first cell as being in the maze
@@ -146,6 +132,8 @@ function buildMaze(maze) {
         // Random index into the frontier
         nextFrontier = Math.floor(Math.random() * frontier.length);
 
+        // Row and column of the frontier cell
+        // (soon to be included as part of the maze)
         frontierRow = frontier[nextFrontier][0];
         frontierCol = frontier[nextFrontier][1];
 
@@ -153,18 +141,30 @@ function buildMaze(maze) {
         neighbors = getNeighbors(maze, frontierRow, frontierCol);
 
         // Include this cell from the frontier as "IN" the maze
+        // Also adds its neighboring cells not already in the maze
+        // to the frontier
         mark(frontier, maze, nextFrontier);
 
         // Pick a random neighbor of the frontier cell
         // At least 1 neighbor "IN" the maze by definition
+        // This neighbor will be the connection from the frontier cell
+        // to the rest of the maze, all other neighbors to the
+        // frontier cell will have a wall in between them
         randNdx = Math.floor(Math.random() * neighbors.length);
+
+        //Row and column of the neighbor (cell already included "IN" the maze
+        // ie a place you can walk through to get the coffee)
         inNeighRow = neighbors[randNdx][0];
         inNeighCol = neighbors[randNdx][1];
-        // Mark the connecting cell between this neighbor and the frontier cell
-        // also as "IN" (part of the maze)
+
+        // Different ways to do the math (this is one),
+        // but this gets and marks the cell connecting the
+        // frontier cell to the maze as also in"IN" the maze.
         var frontRowNeigh = frontierRow - (frontierRow - inNeighRow) / 2;
         var frontColNeigh = frontierCol - (frontierCol - inNeighCol) / 2;
         maze[frontRowNeigh][frontColNeigh] = "IN";
+
+        // Records the last cell to leave the frontier
         end = [frontRowNeigh, frontColNeigh];
         // Go through the neighbors and either add a path or a wall between them
         for (var i = 0; i < neighbors.length; i++) {
@@ -173,20 +173,23 @@ function buildMaze(maze) {
             var nCol = neighbors[i][1];
             var rDiff = (frontierRow - nRow) / 2;
             var cDiff = (frontierCol - nCol) / 2;
+            // if this neighbor is not the one the frontier cell is connecting to
             if (i !== randNdx) {
                 // Place a "WALL" between the frontier cell and this neighbor
-                // Probably doesn't work
                 maze[nRow + rDiff][nCol + cDiff] = "WALL";
             }
         }
 
 
     }
+    // Add the last "IN" part added to the maze as the coffee's location
     startEnd.push(end);
     return startEnd;
 
 }
 
+// Returns a new 2D array identical in composition
+// to the given parameter
 function mazeCopy(maze) {
     var newMaze = [];
     for (var r = 0; r < maze.length; r++) {
@@ -198,33 +201,36 @@ function mazeCopy(maze) {
     return newMaze;
 }
 
+
+// Finds the path to get back to the start position
+// beginning from where the coffee is.
 function backTrack(maze, endRow, endCol) {
 
-    // Similiar in structure to maze
-    // 2D array of divs
-    var MazeDivs = $("#MazeDiv")[0].children;
-    var currDiv;
-    console.log(MazeDivs);
-
+    // Start from the end (coffee) location
     var curRow = endRow;
     var curCol = endCol;
     // Start with the total path length from start to end
     var distance = maze[curRow][curCol];
     var id; //id of a specific html div in the solution path
 
+    // Only changing the row or column by one each loop iteration
+    // because iterating through the path the row or col only
+    // needs to change by 1 to get to the next cell in the path
     while (distance > 0) {
         distance = maze[curRow][curCol];
-        if (curRow + 1 >= 0 && curRow + 1 < maze.length && curCol >= 0 && curCol < maze[0].length && maze[curRow + 1][curCol] === distance - 1) {
+        if (curRow + 1 >= 0 && curRow + 1 < maze.length && curCol >= 0 &&
+            curCol < maze[0].length && maze[curRow + 1][curCol] === distance - 1) {
+
             maze[curRow][curCol] = 0;
             id = "r" + curRow + "c" + curCol;
-            $("#" + id).css("background-color", "white");
+            $("#" + id).css("background-color", "yellow");
             curRow += 1;
             //curCol = curCol;
         }
         else if (curRow - 1 >= 0 && curRow - 1 < maze.length && curCol >= 0 && curCol < maze[0].length && maze[curRow - 1][curCol] === distance - 1) {
             maze[curRow][curCol] = 0;
             id = "r" + curRow + "c" + curCol;
-            $("#" + id).css("background-color", "white");
+            $("#" + id).css("background-color", "yellow");
             curRow -= 1;
             //curCol = curCol;
         }
@@ -232,14 +238,14 @@ function backTrack(maze, endRow, endCol) {
             //curRow = curRow;
             maze[curRow][curCol] = 0;
             id = "r" + curRow + "c" + curCol;
-            $("#" + id).css("background-color", "white");
+            $("#" + id).css("background-color", "yellow");
             curCol += 1;
         }
         else if (curRow >= 0 && curRow < maze.length && curCol - 1 >= 0 && curCol - 1 < maze[0].length && maze[curRow][curCol - 1] === distance - 1) {
             //curRow = curRow;
             maze[curRow][curCol] = 0;
             id = "r" + curRow + "c" + curCol;
-            $("#" + id).css("background-color", "white");
+            $("#" + id).css("background-color", "yellow");
             curCol -= 1;
         }
 
@@ -249,18 +255,24 @@ function backTrack(maze, endRow, endCol) {
 
 function solveMaze(maze, start) {
     // Solve and show solution (in browser)
-    // TODO solve
+
+    //Condition to check if end location is reached
     var done = false;
+    // Array's can act of queues in javascript... so cool
+    // http://stackoverflow.com/questions/1590247/how-do-you-implement-a-stack-and-a-queue-in-javascript
     var queue = [];
     var currCell;
-    var infinity = 5000;
+    var infinity = 8000;
+
     var row;
     var col;
 
-
-
     var newMaze = mazeCopy(maze);
 
+    // Recreate the maze into a new object
+    // Walls are represented by a value of -1
+    // All other possible places to traverse the maze
+    // are given a value of "infinity" or 8000, that's big enough right?
     for (var r = 0; r < newMaze.length; r++) {
         for (var c = 0; c < newMaze[r].length; c++) {
             if (newMaze[r][c] === "IN" || newMaze[r][c] === "end") {
@@ -279,6 +291,7 @@ function solveMaze(maze, start) {
     var endCol;
     var endRow;
 
+    // My attempt at Djikstra's algorithm
     while (queue.length > 0 && done === false) {
         currCell = queue.shift();
         row = currCell[0];
@@ -333,6 +346,7 @@ function drawMaze(maze) {
 
     var type;
     var HTML;
+    // Unique id of a specific div identified by its row and col
     var id;
 
     for (var r = 0; r < maze.length; r++) {
@@ -375,8 +389,8 @@ function start() {
     // 1: a valid walk place... carpet?
     // Could prompt user for size of map
     var maze = [];
-    var rows = 16;
-    var cols = 16;
+    var rows = 20;
+    var cols = 35;
     var startEnd;
 
     for (var i = 0; i < rows; i++) {
@@ -394,7 +408,10 @@ function start() {
     }
 
     // Fill in the maze object with walls and what not
+    // Build maze makes the maze and returns the start and
+    // end locations in the startEnd variable
     startEnd = buildMaze(maze);
+
     var startRow = startEnd[0][0];
     var startCol = startEnd[0][1];
     maze[startRow][startCol] = "start";
@@ -407,9 +424,18 @@ function start() {
 
     // Djikstra?
     //solveMaze(maze);
+    $("#solve").unbind("click");
     $("#solve").on("click", function() {
         // Pass the maze and the start position
         solveMaze(maze, startEnd[0]);
+    });
+
+    $("#restart").unbind("click");
+    $("#restart").on("click", function() {
+        // Clear out the current HTML drawing the maze
+        $("#MazeDiv").empty();
+        //Restart!
+        start();
     });
 
     printMaze(maze);
