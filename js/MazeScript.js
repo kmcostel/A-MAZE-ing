@@ -406,14 +406,14 @@ function drawMaze(maze) {
             }
             else if (maze[r][c] === "start") {
                 type = "start";
-                HTML += "<div class=\"" + type + "\">";
-                HTML += "<img src=\"StickMan.png\" height=\""+cellHeight+"\" width=\""+cellWidth+"\">";
+                HTML += "<div style=\"width:"+cellWidth+"px; height:"+cellHeight +"px;\" id=\""+id+ "\" class=\"" + type + "\">";
+                HTML += "<img src=\"StickMan.png\" style=\"height: 100%; width: 100%; object-fit: contain\">";
                 HTML += "</div>";
             }
             else if (maze[r][c] === "end") {
                 type = "end";
-                HTML += "<div class=\"" + type + "\">";
-                HTML += "<img src=\"CoffeeMug.jpg\" height=\""+cellHeight+"\" width=\""+cellWidth+"\">";
+                HTML += "<div style=\"width:"+cellWidth+"px; height:"+cellHeight +"px;\" id=\""+id+ "\" class=\"" + type + "\">";
+                HTML += "<img src=\"CoffeeMug.jpg\" style=\"height: 100%; width: 100%; object-fit: contain\">";
                 HTML += "</div>";
             }
             else {
@@ -435,6 +435,10 @@ function refreshPage() {
   $("#MazeDiv").empty();
   $("#restart").unbind("click");
   $("#solve").unbind("click");
+
+  // Clear the text areas
+  $('#numRows').val("");
+  $('#numCols').val("");
 
 }
 
