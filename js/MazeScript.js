@@ -11,17 +11,19 @@
  * Then backtrace from the end to the start to find the shortest path from the individual
  * and their coffee. Enjoy!
  *
- * Note: This is also my application to Rally Health. I hope you guys enjoy it!
+ * Note: This is my application to Rally Health. I hope you guys enjoy it!
  * This project can be found on my github at : https://github.com/kmcostel/Maze
  */
 
-/* Future improvements:
- * 1. Take custom input for size of the maze, could do this as of now, but would have to limit to
- *    be less than a certain size to fit within the HTML div.
- * 2. Have the size of the cells on the webpage be dynamic in the sense that they are determined
- *    by the size of the maze. So if the div that contains the maze is 200px and the user
- *    desires 40 columns, then make each cell be the div width / # columns ie. (200 / 40) px in width
- *    and same idea applies to the height.
+/* "NOT IN", "IN", "WALL" are the possible values of the maze at a given time in its creation
+ * IN: cell is valid part of the maze path; you can walk here
+ * WALL: Part of the maze, can't walk here
+ * NOT IN: Not part of the maze.
+ *
+
+/* Images:
+ * Stickman: https://www.google.com/url?sa=i&rct=j&q=&esrc=s&source=images&cd=&cad=rja&uact=8&ved=0ahUKEwjg4e3ij7rPAhUJ1oMKHX83BiQQjRwIBw&url=https%3A%2F%2Fen.wikipedia.org%2Fwiki%2FStick_figure&bvm=bv.134495766,d.amc&psig=AFQjCNHmxCqtUJyPG4W4w9Ch_2p-5Rdhvg&ust=1475429074891656
+ * Coffee: http://patrickdobson.com/wp-content/uploads/2015/12/coffee-beans.jpg
  */
 
 
@@ -75,17 +77,15 @@ function addFrontier(r, c, maze, frontier) {
     var row = r;
     var col = c;
     // Get the frontier cells of the given one at (r, c)
+    // The frontier contains cells that are a distance of 2 away from the maze
+    // Distance is either 2 rows or 2 columns away
 
     // For each possible neighbor of the given cell, see if it would be a valid location
     // ie within the bounds of the maze. Also check that the cell is not already in the maze
     // or the frontier.
-    // Add the cell to the frontier if it satisfies these constraints
-    // Note that frontier may contain many duplicates of cells at certain points in the code, making
-    // some cells more likely to be chosen to be included in the maze.
-    // Array.includes([1,1]) always returns false even if the frontier array has a
-    // value of [5, 5]. It would be better to not have duplicates so each cell has a fair chance
-    // of being chosen to be added to the maze next, but this will do.
-    // frontierContains function prevents creating duplicate cells in the frontier.
+    // Add the cell to the frontier if it satisfies above constraints
+    // Array.includes([5,5]) always returns false even if the frontier array has a
+    // value of [5, 5].
 
     if (row + 2 >= 0 && row + 2 < maze.length && col >= 0 && col < maze[row].length &&
          maze[row + 2][col] === "NOT IN" && frontierContains(frontier, row + 2, col) === false) {
@@ -317,12 +317,16 @@ function solveMaze(maze, start) {
     var endRow;
 
     // My attempt at Djikstra's algorithm
+    // Weights are the shortest distance to them from the start position
     while (queue.length > 0 && done === false) {
+        // Pop the first element
         currCell = queue.shift();
+        //Get it's row and column
         row = currCell[0];
         col = currCell[1];
         currDistance = newMaze[row][col];
 
+        // If it's the end; the coffee
         if (maze[row][col] === "end") {
             endRow = row;
             endCol = col;
@@ -367,11 +371,9 @@ function solveMaze(maze, start) {
 }
 
 // Create HTML elements and add them to Maze.html
+// For changes in visual appearance of the maze such as color, edit here
 function drawMaze(maze) {
 
-    // TODO get the width and length of maze and then determine
-    // the length and width of pixel size to fit inside of
-    // HTML div. TL;DR resize squares to fit HTML div
     var mazeWidth;
     var mazeHeight;
     var cellWidth;
@@ -433,7 +435,11 @@ function drawMaze(maze) {
 function refreshPage() {
   // Clear event listeners and divs out
   $("#MazeDiv").empty();
+
+  // Don't call start() more than once at a time
   $("#restart").unbind("click");
+
+  // Don't want the maze solving old solutions of itself...
   $("#solve").unbind("click");
 
   // Clear the text areas
@@ -470,7 +476,7 @@ function start(rows, cols) {
         for (var j = 0; j < cols; j++) {
             // Init every cell to have value 0
             // ie. be a wall
-            //NOT IN, IN, WALL
+            // Possible values: NOT IN, IN, WALL
             maze[i].push("NOT IN");
         }
     }
@@ -488,10 +494,10 @@ function start(rows, cols) {
     var endCol = startEnd[1][1];
     maze[endRow][endCol] = "end";
 
+    // Adds HTML to DOM to show maze
+    // For changes in visual appearance of the maze such as color
+    // edit in drawMaze()
     drawMaze(maze);
-
-    // Djikstra?
-    //solveMaze(maze);
 
     $("#solve").on("click", function() {
         // Pass the maze and the start position
