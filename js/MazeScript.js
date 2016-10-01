@@ -1,7 +1,30 @@
 /* Author: Kevin Costello
  * Date: 9/30/2016
  * Program: Maze Maker
+ * Description: Program creates a maze by using Primm's modified algorithm
+ * by largely referencing this blog:
+ http://weblog.jamisbuck.org/2011/1/10/maze-generation-prim-s-algorithm
+ * and this StackOverflow post:
+ http://stackoverflow.com/questions/29739751/implementing-a-randomly-generated-maze-using-prims-algorithm
+ * So general idea is to create a 2D array to represent the maze. Go through Prim's algorithm
+ * to generate the maze. Then use Djikstra's algorithm to find a path from the start to the end.
+ * Then backtrace from the end to the start to find the shortest path from the individual
+ * and their coffee. Enjoy!
+ *
+ * Note: This is also my application to Rally Health. I hope you guys enjoy it!
+ * This project can be found on my github at : https://github.com/kmcostel/Maze
  */
+
+/* Future improvements:
+ * 1. Take custom input for size of the maze, could do this as of now, but would have to limit to
+ *    be less than a certain size to fit within the HTML div.
+ * 2. Have the size of the cells on the webpage be dynamic in the sense that they are determined
+ *    by the size of the maze. So if the div that contains the maze is 200px and the user
+ *    desires 40 columns, then make each cell be the div width / # columns ie. (200 / 40) px in width
+ *    and same idea applies to the height.
+ */
+
+
 
 function getNeighbors(maze, r, c) {
     var row = r;
@@ -216,6 +239,9 @@ function backTrack(maze, endRow, endCol) {
     // Only changing the row or column by one each loop iteration
     // because iterating through the path the row or col only
     // needs to change by 1 to get to the next cell in the path
+    // because every consecutive part of the path must be touching
+    // the previous part ie the row or the column must stay the same
+    // when moving from one cell to the next in the path
     while (distance > 0) {
         distance = maze[curRow][curCol];
         if (curRow + 1 >= 0 && curRow + 1 < maze.length && curCol >= 0 &&
@@ -250,7 +276,6 @@ function backTrack(maze, endRow, endCol) {
         }
 
     }
-    printMaze(maze);
 }
 
 function solveMaze(maze, start) {
@@ -344,35 +369,57 @@ function solveMaze(maze, start) {
 // Create HTML elements and add them to Maze.html
 function drawMaze(maze) {
 
+    // TODO get the width and length of maze and then determine
+    // the length and width of pixel size to fit inside of
+    // HTML div. TL;DR resize squares to fit HTML div
+    var mazeWidth;
+    var mazeHeight;
+    var cellWidth;
+    var cellHeight;
+    var containerWidth;
+    var containerHeight;
+
+    var numRows = maze.length;
+    var numCols = maze[0].length;
+
+    mazeWidth = $("#MazeDiv").width();
+    mazeHeight = $("#MazeDiv").height();
+
+    containerWidth = mazeWidth;
+    containerHeight = mazeHeight / numRows;
+
+    cellWidth = containerWidth / numCols;
+    cellHeight = containerHeight;
+
     var type;
     var HTML;
     // Unique id of a specific div identified by its row and col
     var id;
 
     for (var r = 0; r < maze.length; r++) {
-        HTML = "<div class=\"container\">";
+        HTML = "<div class=\"container\" style=\"width:" + containerWidth + "px; height:" + containerHeight + "px;\">";
         for (var c = 0; c < maze[r].length; c++) {
             if (maze[r][c] === "NOT IN" || maze[r][c] === "WALL") {
                 type = "wall";
                 id = "r" + r + "c" + c;
-                HTML += "<div id=\""+id+ "\" class=\"" + type + "\"></div>";
+                HTML += "<div style=\"width:"+cellWidth+"px; height:"+cellHeight +"px;\" id=\""+id+ "\" class=\"" + type + "\"></div>";
             }
             else if (maze[r][c] === "start") {
                 type = "start";
                 HTML += "<div class=\"" + type + "\">";
-                HTML += "<img src=\"StickMan.png\" height=\"30\" width=\"30\">";
+                HTML += "<img src=\"StickMan.png\" height=\""+cellHeight+"\" width=\""+cellWidth+"\">";
                 HTML += "</div>";
             }
             else if (maze[r][c] === "end") {
                 type = "end";
                 HTML += "<div class=\"" + type + "\">";
-                HTML += "<img src=\"CoffeeMug.jpg\" height=\"30\" width=\"30\">";
+                HTML += "<img src=\"CoffeeMug.jpg\" height=\""+cellHeight+"\" width=\""+cellWidth+"\">";
                 HTML += "</div>";
             }
             else {
                 type = "path";
                 id = "r" + r + "c" + c;
-                HTML += "<div id=\""+id+ "\" class=\"" + type + "\"></div>";
+                HTML += "<div style=\"width:"+cellWidth+"px; height:"+cellHeight +"px;\" id=\""+id+ "\" class=\"" + type + "\"></div>";
             }
         }
         HTML += "</div>";
@@ -383,14 +430,31 @@ function drawMaze(maze) {
 
 }
 
-function start() {
+function refreshPage() {
+  // Clear event listeners and divs out
+  $("#MazeDiv").empty();
+  $("#restart").unbind("click");
+  $("#solve").unbind("click");
+
+}
+
+function start(rows, cols) {
     // Keeps track of where walls and non-walls are
     // 0: a wall
     // 1: a valid walk place... carpet?
     // Could prompt user for size of map
+
+    //Refresh the web page
+    refreshPage();
+
     var maze = [];
-    var rows = 20;
-    var cols = 35;
+
+    var rows = (rows !== undefined && rows !== "" && rows < 20 && rows > 5 ? rows : 20);
+    var cols = (cols !== undefined && cols !== "" && cols < 40 && cols > 3 ? cols : 40);
+
+    // Array to record the position of the maze's start and end
+    // startEnd[0] = [startRow, startCo]
+    // startEnd[1] = [endRow, endCol]
     var startEnd;
 
     for (var i = 0; i < rows; i++) {
@@ -424,21 +488,15 @@ function start() {
 
     // Djikstra?
     //solveMaze(maze);
-    $("#solve").unbind("click");
+
     $("#solve").on("click", function() {
         // Pass the maze and the start position
         solveMaze(maze, startEnd[0]);
     });
 
-    $("#restart").unbind("click");
+
     $("#restart").on("click", function() {
-        // Clear out the current HTML drawing the maze
-        $("#MazeDiv").empty();
         //Restart!
         start();
     });
-
-    printMaze(maze);
 }
-
-start();
