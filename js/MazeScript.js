@@ -388,6 +388,17 @@ function drawMaze(maze) {
     cellWidth = containerWidth / numCols;
     cellHeight = containerHeight;
 
+    // Resize the cells if they're too big
+    // Don't need (or want) to take up entire web page with a small maze
+    if (cellWidth > 40) {
+      cellWidth = 30;
+    }
+
+    if (cellHeight > 40) {
+      cellHeight = 30;
+      containerHeight = 30;
+    }
+
     var type;
     var HTML;
     // Unique id of a specific div identified by its row and col
