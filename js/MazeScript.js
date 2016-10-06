@@ -1,18 +1,16 @@
 /* Author: Kevin Costello
- * Date: 10/01/2016
+ * Date: 10/06/2016
  * Program: Maze Maker & Solver
- * Description: Program creates a maze by using Primm's modified algorithm
+ * Description: Program creates a maze by using Prim's modified algorithm
  * by largely referencing this blog:
  http://weblog.jamisbuck.org/2011/1/10/maze-generation-prim-s-algorithm
  * and this StackOverflow post:
  http://stackoverflow.com/questions/29739751/implementing-a-randomly-generated-maze-using-prims-algorithm
- * So general idea is to create a 2D array to represent the maze. Go through Prim's algorithm
- * to generate the maze. Then use Djikstra's algorithm to find a path from the start to the end.
+ * General idea is to create a 2D array to represent the maze. Go through Prim's algorithm
+ * to generate the maze. Then use Dijkstra's algorithm to find a path from the start to the end.
  * Then backtrace from the end to the start to find the shortest path from the individual
  * and their coffee. Enjoy!
  *
- * Note: This is my application to Rally Health. I hope you guys enjoy it!
- * This project can be found on my github at : https://github.com/kmcostel/Maze
  */
 
 /* "NOT IN", "IN", "WALL" are the possible values of the maze at a given time in its creation
@@ -76,7 +74,7 @@ function frontierContains(frontier, row, col) {
 function addFrontier(r, c, maze, frontier) {
     var row = r;
     var col = c;
-    // Get the frontier cells of the given one at (r, c)
+    // Get the frontier cells of the given one at [r][c]
     // The frontier contains cells that are a distance of 2 away from the maze
     // Distance is either 2 rows or 2 columns away
 
