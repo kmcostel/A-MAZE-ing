@@ -403,6 +403,7 @@ function drawMaze(maze) {
     var id;
 
     for (var r = 0; r < maze.length; r++) {
+        // Container to hold each "cell" or square of the mase,
         HTML = "<div class=\"container\" style=\"width:" + containerWidth + "px; height:" + containerHeight + "px;\">";
         for (var c = 0; c < maze[r].length; c++) {
             if (maze[r][c] === "NOT IN" || maze[r][c] === "WALL") {
@@ -462,7 +463,7 @@ function refreshPage() {
 // r and c for number of rows and columns respectively
 // r and c taken from the textareas; may or may not be passed in
 function start(r, c) {
-    // Clear event listeners, and clear out the maze's div
+    // Remove event listeners, and clear out the maze's div
     refreshPage();
 
     var maze = [];
@@ -470,8 +471,8 @@ function start(r, c) {
     // Rows limited to size of 5 - 20
     // Columns limited to a size of 3 - 40
     // Should tell user that their sized map is not fitting their specs
-    var rows = (r !== undefined && r !== "" && r <= 30 && r >= 10 ? r : 20);
-    var cols = (c !== undefined && c !== "" && c <= 60 && c >= 5  ? c : 50);
+    var rows = (r !== undefined && r !== "" && r <= 40 && r >= 10 ? r : 25);
+    var cols = (c !== undefined && c !== "" && c <= 70 && c >= 5  ? c : 55);
 
     // Array to record the position of the maze's start and end
     // startEnd[0] = [startRow, startCo]
@@ -506,7 +507,7 @@ function start(r, c) {
     maze[endRow][endCol] = "end";
 
     // Adds HTML to DOM to show maze
-    // For changes in visual appearance of the maze such as color
+    // To change appearance of the maze such as color
     // edit in drawMaze()
     drawMaze(maze);
 

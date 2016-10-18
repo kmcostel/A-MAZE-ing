@@ -23,14 +23,14 @@
       float: left;
     }
     .path {
-      background-color: gray;
+      background-color: #999999;
       animation-name: loadMaze;
-      animation-duration: 0.3s;
+      animation-duration: 0.4s;
     }
     .final {
-      background-color: yellow;
+      background-color: #00F12C; /* A nice green color */
       animation-name: showSolution;
-      animation-duration: 0.4s;
+      animation-duration: 0.6s;
     }
     #MazeDiv {
       width: 1200px;
@@ -45,11 +45,11 @@
     }
     @keyframes loadMaze {
       from { background-color: black; }
-      to { background-color: gray; }
+      to { background-color: #999999; }
     }
     @keyframes showSolution {
       from { background-color: gray; }
-      to { background-color: yellow; }
+      to { background-color: #00F12C; }
     }
   </style>
 </head>
@@ -59,8 +59,8 @@
   <h1> Where's my coffee...</h1> <!-- Seriously! -->
 
   <button id="customSizeMazeBtn" onclick="customMazeSize()"> Generate custom sized maze! </button>
-  # of rows ( >= 10 & <= 30 ) =      <textarea id="numRows" rows="1" cols="3"></textarea>
-  , # of columns ( >= 5 & <= 60 ) =   <textarea id="numCols" rows="1" cols="3"></textarea>
+  # of rows ( >= 10 & <= 40 ) =      <textarea id="numRows" rows="1" cols="3"></textarea>
+  , # of columns ( >= 5 & <= 70 ) =   <textarea id="numCols" rows="1" cols="3"></textarea>
 
   <script>
     function customMazeSize() {
