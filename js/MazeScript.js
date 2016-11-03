@@ -1,11 +1,12 @@
 /* Author: Kevin Costello
  * Date: 10/06/2016
  * Program: Maze Maker & Solver
+ *
  * Description: Program creates a maze by using Prim's modified algorithm
  * by largely referencing this blog:
- http://weblog.jamisbuck.org/2011/1/10/maze-generation-prim-s-algorithm
+      http://weblog.jamisbuck.org/2011/1/10/maze-generation-prim-s-algorithm
  * and this StackOverflow post:
- http://stackoverflow.com/questions/29739751/implementing-a-randomly-generated-maze-using-prims-algorithm
+      http://stackoverflow.com/questions/29739751/implementing-a-randomly-generated-maze-using-prims-algorithm
  * General idea is to create a 2D array to represent the maze. Go through Prim's algorithm
  * to generate the maze. Then use Dijkstra's algorithm to find a path from the start to the end.
  * Then backtrace from the end to the start to find the shortest path from the individual
@@ -103,6 +104,8 @@ function addFrontier(r, c, maze, frontier) {
     }
 }
 
+// Marks the frontier cell as being IN the maze.
+// ie a place the person can walk on
 function mark(frontier, maze, frontierNdx) {
     // Get the row and col of the frontier cell
     var r = frontier[frontierNdx][0];
@@ -113,7 +116,7 @@ function mark(frontier, maze, frontierNdx) {
     // Remove the given cell from the frontier
     frontier.splice(frontierNdx, 1);
 
-    // Add the neighbors of the given cell to the frontier
+    // Add the neighbors of the now included cell to the frontier
     addFrontier(r, c, maze, frontier);
 }
 
@@ -129,6 +132,7 @@ function buildMaze(maze) {
     var startRow = Math.floor(Math.random() * maze.length);
     var startCol = Math.floor(Math.random() * maze[0].length);
 
+    // index 0 contains the starting location
     startEnd.push([startRow, startCol]);
 
     //Cells to consider making part of the maze's path?
@@ -141,14 +145,11 @@ function buildMaze(maze) {
     // and adds all its neighbors to the frontier
     mark(frontier, maze, 0);
 
-    // Keep going until no more cells in the "Frontier"
-    // Till every cell has been explored and added to the maze
-
     var frontierRow; // current row of cell connecting to the graph
     var frontierCol;
     var inNeighRow; // all frontier cells must have a neighbor in the maze
     var inNeighCol;
-
+    // Keep going until no more cells in the "frontier"
     while (frontier.length > 0) {
         // Random index into the frontier
         nextFrontier = Math.floor(Math.random() * frontier.length);
@@ -170,32 +171,34 @@ function buildMaze(maze) {
         // At least 1 neighbor "IN" the maze by definition
         // This neighbor will be the connection from the frontier cell
         // to the rest of the maze, all other neighbors to the
-        // frontier cell will have a wall in between them
+        // frontier cell will have a wall inbetween them
         randNdx = Math.floor(Math.random() * neighbors.length);
 
-        //Row and column of the neighbor (cell already included "IN" the maze
+        // Row and column of the neighbor (cell already included "IN" the maze
         // ie a place you can walk through to get the coffee)
         inNeighRow = neighbors[randNdx][0];
         inNeighCol = neighbors[randNdx][1];
 
         // Different ways to do the math (this is one),
         // but this gets and marks the cell connecting the
-        // frontier cell to the maze as also in"IN" the maze.
+        // frontier cell to the maze as also "IN" the maze.
         var frontRowNeigh = frontierRow - (frontierRow - inNeighRow) / 2;
         var frontColNeigh = frontierCol - (frontierCol - inNeighCol) / 2;
         maze[frontRowNeigh][frontColNeigh] = "IN";
 
         // Records the last cell to leave the frontier
+        // final value will be set on last loop iteration
+        // ie when frontiers.length = 0
         end = [frontRowNeigh, frontColNeigh];
         // Go through the neighbors and either add a path or a wall between them
         for (var i = 0; i < neighbors.length; i++) {
-            // This is so ugly fix this up
-            var nRow = neighbors[i][0];
-            var nCol = neighbors[i][1];
-            var rDiff = (frontierRow - nRow) / 2;
-            var cDiff = (frontierCol - nCol) / 2;
+
             // if this neighbor is not the one the frontier cell is connecting to
             if (i !== randNdx) {
+                var nRow = neighbors[i][0];
+                var nCol = neighbors[i][1];
+                var rDiff = (frontierRow - nRow) / 2;
+                var cDiff = (frontierCol - nCol) / 2;
                 // Place a "WALL" between the frontier cell and this neighbor
                 maze[nRow + rDiff][nCol + cDiff] = "WALL";
             }
@@ -203,13 +206,13 @@ function buildMaze(maze) {
 
 
     }
-    // Add the last "IN" part added to the maze as the coffee's location
+    // Add the last "IN" part added to the maze as the coffee's (finish line) location
     startEnd.push(end);
-    return startEnd;
 
+    return startEnd;
 }
 
-// Returns a new 2D array identical in composition
+// Returns a new 2D array identical in value
 // to the given parameter
 function mazeCopy(maze) {
     var newMaze = [];
@@ -238,32 +241,28 @@ function backTrack(maze, endRow, endCol) {
     // because iterating through the path the row or col only
     // needs to change by 1 to get to the next cell in the path
     // because every consecutive part of the path must be touching
-    // the previous part ie the row or the column must stay the same
-    // when moving from one cell to the next in the path
-    while (distance > 0) {
+    // the previous part ie either the row or the column must stay
+    // the same when moving from one cell to the next in the path
+    while (distance > 0) { // distance = 0 at the start of maze
         distance = maze[curRow][curCol];
         id = "#r" + curRow + "c" + curCol;
         if (curRow + 1 >= 0 && curRow + 1 < maze.length && curCol >= 0 &&
             curCol < maze[0].length && maze[curRow + 1][curCol] === distance - 1) {
-
                     $(id).addClass("final");
                     curRow += 1;
         }
         else if (curRow - 1 >= 0 && curRow - 1 < maze.length && curCol >= 0 &&
                  curCol < maze[0].length && maze[curRow - 1][curCol] === distance - 1) {
-
                     $(id).addClass("final");
                     curRow -= 1;
         }
         else if (curRow >= 0 && curRow < maze.length && curCol + 1 >= 0 &&
                  curCol + 1 < maze[0].length && maze[curRow][curCol + 1] === distance - 1) {
-
                     $(id).addClass("final");
                     curCol += 1;
         }
         else if (curRow >= 0 && curRow < maze.length && curCol - 1 >= 0 &&
                  curCol - 1 < maze[0].length && maze[curRow][curCol - 1] === distance - 1) {
-
                     $(id).addClass("final");
                     curCol -= 1;
         }
@@ -276,7 +275,7 @@ function solveMaze(maze, start) {
 
     //Condition to check if end location is reached
     var done = false;
-    // Array's can act of queues in javascript... so cool
+    // Arrays can act of queues in javascript -- So cool!
     // http://stackoverflow.com/questions/1590247/how-do-you-implement-a-stack-and-a-queue-in-javascript
     var queue = [];
     var currCell;
@@ -302,14 +301,17 @@ function solveMaze(maze, start) {
         }
     }
 
+    // Distance from the start to the start is... 0
+    // Distance is infinity everywhere else
     newMaze[start[0]][start[1]] = 0;
-    // push the starting position
+
+    // Push the starting position
     queue.push( [start[0], start[1]] );
     var currDistance;
     var endCol;
     var endRow;
 
-    // My attempt at Djikstra's algorithm
+    // My attempt at Djikstra's algorithm, uses a Breadth First Search
     // Weights are the shortest distance to them from the start position
     while (queue.length > 0 && done === false) {
         // Pop the first element
@@ -326,7 +328,7 @@ function solveMaze(maze, start) {
             done = true;
         }
         else {
-            // Add the neighbors
+            // Add the neighbors (if within the bounds of the maze)
             // Check tentative distances, if tentative distance < current distance
             // add to queue and update the distance
             currDistance = newMaze[row][col];
@@ -484,6 +486,9 @@ function start(r, c) {
         maze.push([]);
     }
 
+    // Fills each row of the maze with "NOT IN" values;
+    // Each row will get number of columns "NOT IN"s in it
+    // Goes to each row and pushes col number of "NOT IN"s to it
     for (var i = 0; i < rows; i++) {
         for (var j = 0; j < cols; j++) {
             // Init every cell to have value 0
