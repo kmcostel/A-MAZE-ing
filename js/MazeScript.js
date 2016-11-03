@@ -1,5 +1,5 @@
 /* Author: Kevin Costello
- * Date: 10/06/2016
+ * Date: 11/02/2016
  * Program: Maze Maker & Solver
  *
  * Description: Program creates a maze by using Prim's modified algorithm
